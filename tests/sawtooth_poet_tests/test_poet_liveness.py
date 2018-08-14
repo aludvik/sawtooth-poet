@@ -50,6 +50,7 @@ class TestPoetLive(unittest.TestCase):
         # Wait until all nodes have reached the minimum block number
         nodes_reached = set()
         while len(nodes_reached) < NODES:
+            blocks = []
             for i in range(0, NODES):
                 block = get_block(i)
                 if block is not None:
@@ -60,7 +61,9 @@ class TestPoetLive(unittest.TestCase):
                     if int(block["header"]["block_num"]) >= BLOCK_TO_REACH:
                         nodes_reached.add(i)
 
-                    log_block(i, block)
+                    blocks.append((i, block))
+
+            log_blocks(blocks)
 
             time.sleep(15)
 
@@ -97,16 +100,25 @@ def get_chain(node):
         LOGGER.warning("Couldn't connect to REST API %s", node)
 
 
-def log_block(node, block):
+def format_block_log(node, block):
     batches = block["header"]["batch_ids"]
     batches = [b[:6] + '..' for b in batches]
-    LOGGER.warning(
-        "Validator-%s has block %s: %s, batches (%s): %s",
+    return "Validator-%s has block %s: %s, batches (%s): %s" % (
         node,
         block["header"]["block_num"],
         block["header_signature"][:6] + '..',
         len(batches),
-        batches)
+        batches,
+    )
+
+
+def log_blocks(blocks):
+    log = "\n" + "\n".join(
+        format_block_log(node, block)
+        for node, block in blocks
+    )
+
+    LOGGER.warning("%s", log)
 
 
 def check_block_batch_count(block, batch_range):

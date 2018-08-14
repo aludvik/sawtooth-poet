@@ -73,11 +73,12 @@ services:
     stop_signal: SIGKILL
 
   validator-0:
-    image: sawtooth-poet-tests:$ISOLATION_ID
+    image: sawtooth-validator$INSTALL_TYPE:$ISOLATION_ID
     build:
       context: .
       dockerfile: ../Dockerfile
     volumes:
+      - $SAWTOOTH_CORE:/project/sawtooth-core
       - $SAWTOOTH_POET:/project/sawtooth-poet
       - sawtooth-keys-0:/etc/sawtooth/keys
       - sawtooth-db-0:/var/lib/sawtooth
@@ -86,6 +87,7 @@ services:
       - 8800
     working_dir: /root
     command: "bash -c \"\
+        export PATH=$$PATH:/project/sawtooth-core/bin:/project/sawtooth-poet/bin && \
         cp /project/sawtooth-poet/tests/sawtooth_poet_tests/poet_liveness_data/validator-0.toml /etc/sawtooth/validator.toml && \
         sawadm keygen --force && \
         sawset genesis \
@@ -97,9 +99,7 @@ services:
           sawtooth.poet.report_public_key_pem=\
           \\\"$$(cat /project/sawtooth-poet/simulator/packaging/simulator_rk_pub.pem)\\\" \
           sawtooth.poet.valid_enclave_measurements=$$(poet enclave measurement) \
-          sawtooth.poet.valid_enclave_basenames=$$(poet enclave basename) \
-          sawtooth.validator.batch_injectors=block_info \
-          'sawtooth.validator.block_validation_rules=NofX:1,block_info;XatY:block_info,0;local:0' \
+          sawtooth.poet.valid_enclave_basenames=$$(poet enclave basename)
           -o config.batch && \
         poet registration create -k /etc/sawtooth/keys/validator.priv -o poet.batch && \
         sawset proposal create \
@@ -108,18 +108,20 @@ services:
           -o poet-settings.batch && \
         sawadm genesis \
           config-genesis.batch config.batch poet.batch poet-settings.batch && \
-        sawtooth-validator -v
+        sawtooth-validator -v \
+            --fork-cache-keep-time 0 \
     \""
     stop_signal: SIGKILL
     environment:
-      PYTHONPATH: "/project/sawtooth-poet/families/block_info"
+      PYTHONPATH: "/project/sawtooth-poet/cli/:/project/sawtooth-core/signing:/project/sawtooth-core/sdk/python"
 
   validator-1:
-    image: sawtooth-poet-tests:$ISOLATION_ID
+    image: sawtooth-validator$INSTALL_TYPE:$ISOLATION_ID
     build:
       context: .
       dockerfile: ../Dockerfile
     volumes:
+      - $SAWTOOTH_CORE:/project/sawtooth-core
       - $SAWTOOTH_POET:/project/sawtooth-poet
       - sawtooth-keys-1:/etc/sawtooth/keys
       - sawtooth-db-1:/var/lib/sawtooth
@@ -129,18 +131,18 @@ services:
     command: "bash -c \"\
         cp /project/sawtooth-poet/tests/sawtooth_poet_tests/poet_liveness_data/validator-1.toml /etc/sawtooth/validator.toml && \
         sawadm keygen --force && \
-        sawtooth-validator -v
+        sawtooth-validator -v \
+            --fork-cache-keep-time 0 \
     \""
-    environment:
-      PYTHONPATH: "/project/sawtooth-poet/families/block_info"
     stop_signal: SIGKILL
 
   validator-2:
-    image: sawtooth-poet-tests:$ISOLATION_ID
+    image: sawtooth-validator$INSTALL_TYPE:$ISOLATION_ID
     build:
       context: .
       dockerfile: ../Dockerfile
     volumes:
+      - $SAWTOOTH_CORE:/project/sawtooth-core
       - $SAWTOOTH_POET:/project/sawtooth-poet
       - sawtooth-keys-2:/etc/sawtooth/keys
       - sawtooth-db-2:/var/lib/sawtooth
@@ -150,18 +152,18 @@ services:
     command: "bash -c \"\
         cp /project/sawtooth-poet/tests/sawtooth_poet_tests/poet_liveness_data/validator-2.toml /etc/sawtooth/validator.toml && \
         sawadm keygen --force && \
-        sawtooth-validator -v
+        sawtooth-validator -v \
+            --fork-cache-keep-time 0 \
     \""
-    environment:
-      PYTHONPATH: "/project/sawtooth-poet/families/block_info"
     stop_signal: SIGKILL
 
   validator-3:
-    image: sawtooth-poet-tests:$ISOLATION_ID
+    image: sawtooth-validator$INSTALL_TYPE:$ISOLATION_ID
     build:
       context: .
       dockerfile: ../Dockerfile
     volumes:
+      - $SAWTOOTH_CORE:/project/sawtooth-core
       - $SAWTOOTH_POET:/project/sawtooth-poet
       - sawtooth-keys-3:/etc/sawtooth/keys
       - sawtooth-db-3:/var/lib/sawtooth
@@ -171,18 +173,18 @@ services:
     command: "bash -c \"\
         cp /project/sawtooth-poet/tests/sawtooth_poet_tests/poet_liveness_data/validator-3.toml /etc/sawtooth/validator.toml && \
         sawadm keygen --force && \
-        sawtooth-validator -v
+        sawtooth-validator -v \
+            --fork-cache-keep-time 0 \
     \""
-    environment:
-      PYTHONPATH: "/project/sawtooth-poet/families/block_info"
     stop_signal: SIGKILL
 
   validator-4:
-    image: sawtooth-poet-tests:$ISOLATION_ID
+    image: sawtooth-validator$INSTALL_TYPE:$ISOLATION_ID
     build:
       context: .
       dockerfile: ../Dockerfile
     volumes:
+      - $SAWTOOTH_CORE:/project/sawtooth-core
       - $SAWTOOTH_POET:/project/sawtooth-poet
       - sawtooth-keys-4:/etc/sawtooth/keys
       - sawtooth-db-4:/var/lib/sawtooth
@@ -192,10 +194,9 @@ services:
     command: "bash -c \"\
         cp /project/sawtooth-poet/tests/sawtooth_poet_tests/poet_liveness_data/validator-4.toml /etc/sawtooth/validator.toml && \
         sawadm keygen --force && \
-        sawtooth-validator -v
+        sawtooth-validator -v \
+            --fork-cache-keep-time 0 \
     \""
-    environment:
-      PYTHONPATH: "/project/sawtooth-poet/families/block_info"
     stop_signal: SIGKILL
 
   poet-0:
